@@ -2,8 +2,8 @@
 #include <iostream>
 #include <algorithm>
 #include <stack>
-#include <map>
-#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 bool parseNumber(const std::string& str, int& num){
     try{
@@ -35,12 +35,9 @@ std::pair<std::string, std::string> parseEqual(const std::string& str){
 
 
 int main(){
-    std::map<std::string, std::stack<int>> vars; // var -> its values
-
-    std::map<int, std::vector<std::string>> uses_var; // number of block -> list of using variables there
-
-    int num_blk = 0; // number block
-
+    std::unordered_map<std::string, std::stack<int>> vars;
+    std::unordered_map<int, std::unordered_set<std::string>> uses_var;
+    int num_blk = 0;
     std::string cur;
 
     while(std::getline(std::cin, cur)) {
@@ -62,17 +59,17 @@ int main(){
 
         int n;
         auto &cUsesVar = uses_var[num_blk];
-        bool isInBlk1 = std::find(cUsesVar.begin(), cUsesVar.end(), var1) != cUsesVar.end();
+        bool isInBlk1 = cUsesVar.find(var1) != cUsesVar.end();
 
         if (parseNumber(var2, n)) {
             toTop(vars[var1], n, isInBlk1);
-            if (!isInBlk1) cUsesVar.push_back(var1);
+            if (!isInBlk1) cUsesVar.emplace(var1);
         } else {
-            if (std::find(cUsesVar.begin(), cUsesVar.end(), var2) == cUsesVar.end() && vars[var2].empty()) cUsesVar.push_back(var2);
+            if ( cUsesVar.find(var2) == cUsesVar.end() && vars[var2].empty()) cUsesVar.emplace(var2);
             int k = getTop(vars[var2]);
             toTop(vars[var1], k, isInBlk1);
             std::cout << k << "\n";
-            if (!isInBlk1) cUsesVar.push_back(var1);
+            if (!isInBlk1) cUsesVar.emplace(var1);
         }
     }
     return 0;
