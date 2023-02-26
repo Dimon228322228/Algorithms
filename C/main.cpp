@@ -5,6 +5,35 @@
 #include <map>
 #include <vector>
 
+bool parseNumber(const std::string& str, int& num){
+    try{
+        num = std::stoi(str);
+        return true;
+    } catch (const std::invalid_argument& ex) {
+        return false;
+    }
+}
+
+int getTop(std::stack<int>& stack){
+    if ( stack.empty() ){
+        stack.push(0);
+        return 0;
+    } else return stack.top();
+}
+
+void toTop(std::stack<int>& stack, int n, bool isUsedInBlk){
+    getTop(stack);
+    if ( isUsedInBlk ) stack.pop();
+    stack.push(n);
+}
+
+std::pair<std::string, std::string> parseEqual(const std::string& str){
+    auto ptr = str.find('=');
+    return std::pair<std::string , std::string> { str.substr(0,ptr), str.substr(ptr + 1, str.size()) };
+}
+
+
+
 int main(){
     std::map<std::string, std::stack<int>> vars; // var -> its values
 
@@ -14,45 +43,37 @@ int main(){
 
     std::string cur;
 
-    while(std::getline(std::cin, cur)){
-        if (std::find(cur.begin(), cur.end(), '{') != cur.end()) ++num_blk;
+    while(std::getline(std::cin, cur)) {
+        if (std::find(cur.begin(), cur.end(), '{') != cur.end()) {
+            ++num_blk;
+            continue;
+        }
         if (std::find(cur.begin(), cur.end(), '}') != cur.end()) {
-            auto vec = uses_var[num_blk];
-            for (const auto & i : vec){
+            auto& vec = uses_var[num_blk];
+            for (const auto &i: vec) {
                 vars[i].pop();
             }
             uses_var[num_blk].clear();
             --num_blk;
+            continue;
         }
 
-        if (auto ptr = std::find(cur.begin(), cur.end(), '='); ptr != cur.end()) {
+        auto [var1, var2] = parseEqual(cur);
 
-            // split string by left side and right side
-            std::string var1 = std::string(cur.begin(), ptr),
-                        var2 = std::string(ptr + 1, cur.end());
+        int n;
+        auto &cUsesVar = uses_var[num_blk];
+        bool isInBlk1 = std::find(cUsesVar.begin(), cUsesVar.end(), var1) != cUsesVar.end();
 
-            // if not var1 in list of using vars -> add this var there
-            if (std::find(uses_var[num_blk].begin(), uses_var[num_blk].end(), var1) == uses_var[num_blk].end()) {
-                uses_var[num_blk].push_back(var1);
-                if ( vars.find(var1) == vars.end() ) vars[var1].push(0);
-            }
-
-            if (auto v = vars.find(var2); v == vars.end()) {
-                // there is no var2 in list of vars
-                try {
-                    vars[var1].push(std::stoi(var2));
-                } catch(std::invalid_argument) {
-                    vars[var2].push(0);
-                    uses_var[num_blk].push_back(var2);
-                    vars[var1].push(0);
-                    std::cout << 0 << "\n";
-                }
-            } else {
-                vars[var1].push(v->second.top());
-                std::cout << v->second.top() << "\n";
-            }
+        if (parseNumber(var2, n)) {
+            toTop(vars[var1], n, isInBlk1);
+            if (!isInBlk1) cUsesVar.push_back(var1);
+        } else {
+            if (std::find(cUsesVar.begin(), cUsesVar.end(), var2) == cUsesVar.end() && vars[var2].empty()) cUsesVar.push_back(var2);
+            int k = getTop(vars[var2]);
+            toTop(vars[var1], k, isInBlk1);
+            std::cout << k << "\n";
+            if (!isInBlk1) cUsesVar.push_back(var1);
         }
-
     }
     return 0;
 }
