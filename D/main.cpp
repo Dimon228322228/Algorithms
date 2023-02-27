@@ -1,23 +1,12 @@
 #include <iostream>
 #include <map>
-// (1 ≤ a, b ≤ 1000,
-//  0 ≤ c ≤ 1000,
-//  1 ≤ d ≤ 1000,
-//  a ≤ d,
-//  1 ≤ k ≤ 10^18)
+
 int main(){
-    std::map<   int,          int> state;
-    //          ^^^           ^^^
-    // number of bacterias    day
-
-    int a, // bacterias in begin of day
-        b, // a -> a*b - incubator
-        c, // c kills every day
-        d; // capacity container
-    long k; // number of days
+    std::map<int, int> state;
+    int a, b, c, d;
+    long k;
     std::cin >> a >> b >> c >> d >> k;
-
-    int z = std::min(static_cast<long>(1001), k);
+    int z = 1000 > k ? static_cast<int>(k) : 1000;
 
     for(int i = 1; i <= z; ++i){
         a = a * b - c;
@@ -27,21 +16,14 @@ int main(){
         }
         if ( a > d ) a = d;
         if ( state[a] != 0 ){
-            long period = i - state[a];
+            long offset = (k - i) % (i - state[a]);
             state[a] = i;
-            long offset = (k - i) % period;
-            for ( auto j: state){
-                if (j.second == i - offset){
-                    std::cout << j.first;
-                    return 0;
-                }
-            }
+            for ( auto j: state)
+                if (j.second == i - offset) std::cout << j.first;
             return 0;
-        } else {
-            state[a] = i;
         }
+        state[a] = i;
     }
     std::cout << a;
-
     return 0;
 }
