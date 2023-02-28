@@ -5,47 +5,49 @@
 #include <unordered_map>
 #include <unordered_set>
 
-bool parseNumber(const std::string& str, int& num){
+using namespace std;
+
+bool parseNumber(const string& str, int& num){
     try{
-        num = std::stoi(str);
+        num = stoi(str);
         return true;
-    } catch (const std::invalid_argument& ex) {
+    } catch (const invalid_argument& ex) {
         return false;
     }
 }
 
-int getTop(std::stack<int>& stack){
+int getTop(stack<int>& stack){
     if ( stack.empty() ){
         stack.push(0);
         return 0;
     } else return stack.top();
 }
 
-void toTop(std::stack<int>& stack, int n, bool isUsedInBlk){
+void toTop(stack<int>& stack, int n, bool isUsedInBlk){
     getTop(stack);
     if ( isUsedInBlk ) stack.pop();
     stack.push(n);
 }
 
-std::pair<std::string, std::string> parseEqual(const std::string& str){
+pair<string, string> parseEqual(const string& str){
     auto ptr = str.find('=');
-    return std::pair<std::string , std::string> { str.substr(0,ptr), str.substr(ptr + 1, str.size()) };
+    return pair<string, string> { str.substr(0,ptr), str.substr(ptr + 1, str.size()) };
 }
 
 
 
 int main(){
-    std::unordered_map<std::string, std::stack<int>> vars;
-    std::unordered_map<int, std::unordered_set<std::string>> uses_var;
+    unordered_map<string, stack<int>> vars;
+    unordered_map<int, unordered_set<string>> uses_var;
     int num_blk = 0;
-    std::string cur;
+    string cur;
 
-    while(std::getline(std::cin, cur)) {
-        if (std::find(cur.begin(), cur.end(), '{') != cur.end()) {
+    while(getline(cin, cur)) {
+        if (find(cur.begin(), cur.end(), '{') != cur.end()) {
             ++num_blk;
             continue;
         }
-        if (std::find(cur.begin(), cur.end(), '}') != cur.end()) {
+        if (find(cur.begin(), cur.end(), '}') != cur.end()) {
             auto& vec = uses_var[num_blk];
             for (const auto &i: vec) {
                 vars[i].pop();
@@ -68,7 +70,7 @@ int main(){
             if ( cUsesVar.find(var2) == cUsesVar.end() && vars[var2].empty()) cUsesVar.emplace(var2);
             int k = getTop(vars[var2]);
             toTop(vars[var1], k, isInBlk1);
-            std::cout << k << "\n";
+            cout << k << "\n";
             if (!isInBlk1) cUsesVar.emplace(var1);
         }
     }
