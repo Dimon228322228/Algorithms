@@ -12,44 +12,34 @@ struct Cell {
 bool operator < (const Cell &c1, const Cell &c2){ return c1.time > c2.time; }
 bool isValid(int x, int y, int N, int M) { return (x >= 0 && x < N && y >= 0 && y < M); }
 
-Cell findPath(vector<vector<char>>& map, vector<Cell>& visited, int startX, int startY, int endX, int endY) {
+Cell findPath(vector<vector<char>>& map, vector<Cell>& visited, int sX, int sY, int eX, int eY) {
     int N = map.size(), M = map[0].size();
-
     priority_queue<Cell> q;
-
-    Cell startCell(startX * M + startY, 0, -1, ' ');
+    Cell startCell(sX * M + sY, 0, -1, ' ');
     q.push(startCell);
-    visited[startX * M + startY] = startCell;
-
-    int dx[] = {-1, 0, 1, 0};
-    int dy[] = {0, 1, 0, -1};
+    visited[sX * M + sY] = startCell;
+    int dx[] = {-1, 0, 1, 0},
+        dy[] = {0, 1, 0, -1};
     char directions[] = {'N', 'E', 'S', 'W'};
 
     while (!q.empty()) {
-        Cell currCell = q.top();
-        q.pop();
-
-        int currX = currCell.coord / M;
-        int currY = currCell.coord % M;
-        int currTime = currCell.time;
-
-        if (currX == endX && currY == endY) break;
+        Cell currCell = q.top(); q.pop();
+        int currX = currCell.coord / M, currY = currCell.coord % M, currTime = currCell.time;
+        if (currX == eX && currY == eY) break;
 
         for (int i = 0; i < 4; i++) {
-            int newX = currX + dx[i];
-            int newY = currY + dy[i];
-
+            int newX = currX + dx[i], newY = currY + dy[i];
             if (isValid(newX, newY, N, M) && map[newX][newY] != '#') {
-                int newTime = currTime + (map[newX][newY] == 'W' ? 2 : 1);
-                if ( visited[newX * M + newY].time == -1 || visited[newX * M + newY].time > newTime ){
-                    Cell newCell(newX * M + newY, newTime, currCell.coord, directions[i]);
+                int newTime = currTime + (map[newX][newY] == 'W' ? 2 : 1), newCoord = newX * M + newY;
+                if ( visited[newCoord].time == -1 || visited[newCoord].time > newTime ){
+                    Cell newCell(newCoord, newTime, currCell.coord, directions[i]);
                     q.push(newCell);
-                    visited[newX * M + newY] = newCell;
+                    visited[newCoord] = newCell;
                 }
             }
         }
     }
-    return visited[endX * M + endY];
+    return visited[eX * M + eY];
 }
 
 int main() {
