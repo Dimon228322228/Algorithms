@@ -9,6 +9,7 @@ struct Cell {
     string path;
     Cell(int x, int y, int time, string path) : x(x), y(y), time(time), path(path) {}
 };
+bool operator < (const Cell &c1, const Cell &c2){ return c1.time > c2.time; }
 
 bool isValid(int x, int y, int N, int M) {
     return (x >= 0 && x < N && y >= 0 && y < M);
@@ -20,7 +21,7 @@ pair<int, string> findPath(vector<vector<char>>& map, int startX, int startY, in
     vector<vector<Cell>> visited(N, vector<Cell>(M, {-1, -1, -1, ""}));
     vector<vector<int>> time(N, vector<int>(M, -1));
 
-    queue<Cell> q;
+    priority_queue<Cell> q;
 
     Cell startCell(startX, startY, 0, "");
     q.push(startCell);
@@ -32,7 +33,7 @@ pair<int, string> findPath(vector<vector<char>>& map, int startX, int startY, in
     char directions[] = {'N', 'E', 'S', 'W'};
 
     while (!q.empty()) {
-        Cell currCell = q.front();
+        Cell currCell = q.top();
         q.pop();
 
         int currX = currCell.x;
@@ -63,27 +64,14 @@ pair<int, string> findPath(vector<vector<char>>& map, int startX, int startY, in
 }
 
 int main() {
-    int N, M; // Размеры карты мира
-    int startX, startY; // Координаты начального положения поселенца
-    int endX, endY; // Координаты клетки, куда нужно привести поселенца
-
+    size_t N, M; int startX, startY, endX, endY;
     cin >> N >> M >> startX >> startY >> endX >> endY;
-
     vector<vector<char>> map(N, vector<char>(M));
-
-    // Считываем карту мира
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < M; j++) {
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < M; j++)
             cin >> map[i][j];
-        }
-    }
-
-    // Находим минимальное время и путь
     pair<int, string> result = findPath(map, startX - 1, startY - 1, endX - 1, endY - 1);
-
-    // Выводим результат
     cout << result.first << endl;
     cout << result.second << endl;
-
     return 0;
 }
